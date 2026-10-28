@@ -317,6 +317,9 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
 .ref-tx small{display:block;color:var(--muted);font-size:12.5px}
 .ref-tx b{display:block;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .refbar .btn{--h:44px;padding:0 18px;font-size:14px}
+p.ref-note{flex-basis:100%;margin:0 0 4px;font-size:16px;font-weight:600;color:var(--gold-hi)}
+.final-cta p.ref-note{text-align:center}
+.refbar.info .ref-tx b{white-space:normal;overflow:visible}
 body.has-ref footer{padding-bottom:calc(96px + env(safe-area-inset-bottom,0px))}
 @media (max-width:560px){.refbar .btn-ghost{display:none}.refbar .btn{padding:0 14px}}
 
@@ -907,9 +910,23 @@ try {(function(){
   let id = null;
   try { const q = new URLSearchParams(location.search); id = (q.get('p') || q.get('ref') || '').trim().toLowerCase(); } catch(e) {}
   try {
-    if (id && P[id]) localStorage.setItem('peres_ref', JSON.stringify({id, t: Date.now()}));
-    else if (!id) { const s = JSON.parse(localStorage.getItem('peres_ref') || 'null'); if (s && P[s.id] && Date.now() - s.t < 30*864e5) id = s.id; }
+    if (id && (P[id] || id === 'info')) localStorage.setItem('peres_ref', JSON.stringify({id, t: Date.now()}));
+    else if (!id) { const s = JSON.parse(localStorage.getItem('peres_ref') || 'null'); if (s && (P[s.id] || s.id === 'info') && Date.now() - s.t < 30*864e5) id = s.id; }
   } catch(e) {}
+  const CHAT = '<svg viewBox="0 0 24 24" aria-hidden="true" width="20" height="20"><path d="M4 5.5h16v10H9l-5 4v-14Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>';
+  const bar = document.getElementById('refbar'), av = document.getElementById('ref-av'), ask = document.getElementById('ref-ask'), rpay = document.getElementById('ref-pay');
+  const hideAll = sel => document.querySelectorAll(sel).forEach(el => { el.hidden = true; });
+  const note = txt => ['.hero-cta', '.price-cta', '.final-cta'].forEach(sel => document.querySelectorAll(sel).forEach(el => {
+    const n = document.createElement('p'); n.className = 'ref-note'; n.textContent = txt; el.prepend(n); }));
+  function infoMode(txt) {
+    hideAll('[data-pay], [data-book], .contacts, .price-org, .pay-note, .foot-links');
+    note(txt);
+    document.querySelector('.refbar small').textContent = 'Как записаться';
+    document.getElementById('ref-name').textContent = txt;
+    av.innerHTML = CHAT; ask.hidden = true; rpay.hidden = true; bar.classList.add('info');
+    bar.hidden = false; document.body.classList.add('has-ref');
+  }
+  if (id === 'info') { infoMode('Чтобы записаться, напишите тому, кто прислал вам эту ссылку.'); return; }
   const p = id && P[id]; if (!p) return;
   const E = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
   const ICON = {
@@ -935,12 +952,29 @@ try {(function(){
   const po = document.querySelector('.price-org');
   if (po) po.innerHTML = 'Вас пригласил(а) <b>'+E(p.name)+'</b>. Есть вопросы до оплаты — напишите или позвоните, ответим.';
   const mt = document.querySelector('#modal p'); if (mt) mt.textContent = 'Можно сразу оплатить участие онлайн или сначала написать '+first+' и задать вопросы. Мест 40, группы собираем заранее по вашим запросам.';
-  if (p.pay) document.querySelectorAll('[data-pay]').forEach(a => { a.href = p.pay; });
-  const bar = document.getElementById('refbar');
+  document.querySelectorAll('[data-book]').forEach(b => { if (/организатор/.test(b.textContent)) b.textContent = 'Задать вопрос'; });
+  const pn = document.querySelector('.pay-note');
+  if (p.pay) {
+    document.querySelectorAll('[data-pay]').forEach(a => { a.href = p.pay; });
+    if (pn) pn.textContent = 'Оплата по ссылке партнёра, после оплаты придёт чек. Мест — 40.';
+  } else if (links.length) {
+    const [k, , , href] = links[0];
+    const via = {tg:'в Telegram', wa:'в WhatsApp', max:'в MAX', vk:'ВКонтакте', tel:'по телефону'}[k];
+    document.querySelectorAll('[data-pay]').forEach(a => {
+      a.href = href; if (k === 'tel') { a.removeAttribute('target'); }
+      a.innerHTML = a.classList.contains('btn-sm') ? 'Записаться' : CHAT + 'Записаться ' + via;
+    });
+    if (pn) pn.textContent = 'Запись — у ' + 'партнёра практикума: ' + p.name + '. Напишите, и вам расскажут детали и как оплатить участие. Мест — 40.';
+    const st = document.querySelector('#modal .steps');
+    if (st) st.innerHTML = '<li><div>Напишите ' + E(first) + ' — кнопки выше.</div></li><li><div>Расскажите о своём запросе и узнайте, как оплатить участие.</div></li><li><div>Перед практикумом получите адрес площадки.</div></li>';
+    rpay.innerHTML = 'Записаться'; ask.hidden = true;
+    if (mt) mt.textContent = 'Напишите ' + first + ' в удобном мессенджере — расскажут детали и помогут записаться. Мест 40, группы собираем заранее по вашим запросам.';
+  } else {
+    infoMode('Чтобы записаться, напишите ' + p.name + '.'); return;
+  }
   document.getElementById('ref-name').textContent = p.name;
-  const av = document.getElementById('ref-av');
   if (p.photo) av.outerHTML = '<img class="ref-av" src="'+E(p.photo)+'" alt="" width="44" height="44">'; else av.textContent = first.charAt(0);
-  const ask = document.getElementById('ref-ask'); if (links.length) ask.href = links[0][3]; else ask.hidden = true;
+  if (links.length) ask.href = links[0][3]; else ask.hidden = true;
   bar.hidden = false; document.body.classList.add('has-ref');
 })();} catch (err) { console.warn('[partner]', err); }
 </script>

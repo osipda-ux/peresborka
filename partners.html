@@ -40,13 +40,16 @@ a{color:var(--gold-hi)}
   <header>
     <span class="eb">Практикум «Пересборка» · 5 ноября · Москва</span>
     <h1>Личные ссылки партнёров</h1>
-    <p style="margin-top:10px">Партнёр отправляет свою ссылку. Человек видит тот же сайт, но внизу — «Вас пригласил(а) …», контакты партнёра и его кнопка оплаты.</p>
+    <p style="margin-top:10px">Партнёр отправляет свою ссылку. Человек видит тот же сайт, но внизу — «Вас пригласил(а) …» и контакты партнёра. Оплату можно оставить или убрать: тогда вместо неё кнопка «Записаться».</p>
   </header>
   <div class="steps">
     <div class="st"><b>1. Своя ссылка</b><span>У каждого партнёра свой код в конце ссылки: …/peresborka/?p=anna</span></div>
     <div class="st"><b>2. Свои контакты</b><span>Вопросы приходят партнёру, а не организатору.</span></div>
-    <div class="st"><b>3. Видно, чья продажа</b><span>Оплата идёт по личной ссылке партнёра — в кабинете Продамуса видно, кто привёл.</span></div>
+    <div class="st"><b>3. Оплата — по желанию</b><span>Есть у партнёра ссылка оплаты — будет кнопка «Оплатить». Нет — человек пишет партнёру.</span></div>
   </div>
+  <section class="list" aria-label="Универсальная ссылка">
+    <div class="pt" id="info-row"><span class="av" aria-hidden="true">✉</span><div style="min-width:0"><b>Для всех, без оплаты и контактов</b><code id="info-url"></code><small>На сайте: «Чтобы записаться, напишите тому, кто прислал вам эту ссылку»</small></div><button class="btn" type="button" id="info-copy">Скопировать ссылку</button></div>
+  </section>
   <section class="list" id="list" aria-label="Партнёры"></section>
   <p class="note" id="empty" hidden>Партнёров пока нет. Их добавляют в файл <b>partners.js</b> в репозитории на GitHub.</p>
   <p class="note">Посетитель, пришедший по ссылке партнёра, остаётся «за ним» 30 дней на этом устройстве, даже если потом откроет сайт без кода. Новый партнёр добавляется в файл <b>partners.js</b> в репозитории.</p>
@@ -70,6 +73,11 @@ ids.forEach(id => {
   };
   list.appendChild(el);
 });
+(function(){ const u = BASE + '?p=info', b = document.getElementById('info-copy'), row = document.getElementById('info-row');
+  document.getElementById('info-url').textContent = u;
+  b.onclick = () => { const done = () => { b.textContent = 'Скопировано'; setTimeout(() => b.textContent = 'Скопировать ссылку', 1800); };
+    try { navigator.clipboard.writeText(u).then(done, () => sel(row)); } catch (x) { sel(row); } };
+})();
 function sel(el){ const r = document.createRange(); r.selectNodeContents(el.querySelector('code')); const s = getSelection(); s.removeAllRanges(); s.addRange(r); }
 </script>
 </body>
