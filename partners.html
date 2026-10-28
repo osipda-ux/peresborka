@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>Пересборка — ссылки партнёров</title>
+<link rel="stylesheet" href="assets/fonts.css">
+<style>
+:root{--ink:#060A14;--card:#111B31;--line:rgba(242,233,218,.12);--line-2:rgba(242,233,218,.22);--cream:#F2E9DA;--muted:#A9B1C4;--gold:#E2B66A;--gold-hi:#FFE2A8;
+  --serif:"Playfair Display",Georgia,serif;--sans:"Manrope","Segoe UI",system-ui,sans-serif;color-scheme:dark}
+*{box-sizing:border-box}
+html{background:var(--ink)}
+body{margin:0;min-height:100vh;background:radial-gradient(70% 40% at 85% 0%,rgba(226,182,106,.12),transparent 70%),var(--ink);color:var(--cream);font:16px/1.6 var(--sans);
+  padding:48px max(16px,env(safe-area-inset-right,0px)) 64px max(16px,env(safe-area-inset-left,0px))}
+.wrap{max-width:860px;margin:0 auto;display:grid;gap:28px}
+.eb{font-size:13px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--gold)}
+h1{margin:6px 0 0;font:400 clamp(34px,6vw,56px)/1.05 var(--serif)}
+p{margin:0;color:#D9D1C3}
+.steps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.st{border-radius:18px;padding:18px;background:rgba(17,27,49,.8);box-shadow:inset 0 0 0 1px var(--line)}
+.st b{display:block;font:400 22px/1.2 var(--serif);color:var(--gold-hi)}
+.st span{display:block;margin-top:6px;color:var(--muted);font-size:14.5px}
+.list{display:grid;gap:12px}
+.pt{display:grid;grid-template-columns:52px minmax(0,1fr) auto;gap:14px;align-items:center;border-radius:18px;padding:14px 16px;background:rgba(17,27,49,.8);box-shadow:inset 0 0 0 1px var(--line)}
+.av{width:52px;height:52px;border-radius:50%;display:grid;place-items:center;font:400 24px var(--serif);color:var(--ink);background:linear-gradient(160deg,#F4D08E,#C9954A);object-fit:cover}
+.pt b{display:block;font-size:16px}
+.pt code{display:block;font:600 13.5px/1.4 var(--sans);color:var(--gold-hi);word-break:break-all}
+.pt small{display:block;color:var(--muted);font-size:12.5px}
+.btn{appearance:none;border:0;cursor:pointer;min-height:44px;padding:0 16px;border-radius:999px;font:700 14px var(--sans);color:var(--ink);background:linear-gradient(180deg,#F4D08E,#E2B66A 55%,#C9954A)}
+.btn:focus-visible{outline:2px solid var(--gold-hi);outline-offset:3px}
+.note{border-radius:18px;padding:18px 20px;background:rgba(226,182,106,.07);box-shadow:inset 0 0 0 1px rgba(226,182,106,.3);font-size:15px;color:#E9E1D2}
+.note b{color:var(--gold-hi)}
+a{color:var(--gold-hi)}
+@media (max-width:640px){.steps{grid-template-columns:minmax(0,1fr)}.pt{grid-template-columns:44px minmax(0,1fr)}.pt .btn{grid-column:1 / -1}.av{width:44px;height:44px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <span class="eb">Практикум «Пересборка» · 5 ноября · Москва</span>
+    <h1>Личные ссылки партнёров</h1>
+    <p style="margin-top:10px">Партнёр отправляет свою ссылку. Человек видит тот же сайт, но внизу — «Вас пригласил(а) …», контакты партнёра и его кнопка оплаты.</p>
+  </header>
+  <div class="steps">
+    <div class="st"><b>1. Своя ссылка</b><span>У каждого партнёра свой код в конце ссылки: …/peresborka/?p=anna</span></div>
+    <div class="st"><b>2. Свои контакты</b><span>Вопросы приходят партнёру, а не организатору.</span></div>
+    <div class="st"><b>3. Видно, чья продажа</b><span>Оплата идёт по личной ссылке партнёра — в кабинете Продамуса видно, кто привёл.</span></div>
+  </div>
+  <section class="list" id="list" aria-label="Партнёры"></section>
+  <p class="note" id="empty" hidden>Партнёров пока нет. Их добавляют в файл <b>partners.js</b> в репозитории на GitHub.</p>
+  <p class="note">Посетитель, пришедший по ссылке партнёра, остаётся «за ним» 30 дней на этом устройстве, даже если потом откроет сайт без кода. Новый партнёр добавляется в файл <b>partners.js</b> в репозитории.</p>
+</div>
+<script src="partners.js"></script>
+<script>
+const BASE = location.href.replace(/partners\.html.*$/, '');
+const P = window.PARTNERS || {}, list = document.getElementById('list');
+const E = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const ids = Object.keys(P);
+document.getElementById('empty').hidden = ids.length > 0;
+ids.forEach(id => {
+  const p = P[id], url = BASE + '?p=' + encodeURIComponent(id);
+  const el = document.createElement('div'); el.className = 'pt';
+  el.innerHTML = (p.photo ? '<img class="av" src="'+E(p.photo)+'" alt="">' : '<span class="av">'+E((p.name||'?').charAt(0))+'</span>') +
+    '<div style="min-width:0"><b>'+E(p.name||id)+'</b><code>'+E(url)+'</code><small>'+(p.pay ? 'Своя ссылка оплаты' : 'Общая ссылка оплаты')+'</small></div>' +
+    '<button class="btn" type="button">Скопировать ссылку</button>';
+  el.querySelector('button').onclick = e => {
+    const b = e.currentTarget, done = () => { b.textContent = 'Скопировано'; setTimeout(() => b.textContent = 'Скопировать ссылку', 1800); };
+    try { navigator.clipboard.writeText(url).then(done, () => sel(el)); } catch (x) { sel(el); }
+  };
+  list.appendChild(el);
+});
+function sel(el){ const r = document.createRange(); r.selectNodeContents(el.querySelector('code')); const s = getSelection(); s.removeAllRanges(); s.addRange(r); }
+</script>
+</body>
+</html>
